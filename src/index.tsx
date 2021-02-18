@@ -1,13 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Metric } from 'web-vitals';
-import { App } from './App';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.sass';
+import { BrowserRouter } from 'react-router-dom';
+import pkg from 'package.json';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App AppVersion={pkg.version} />
+    </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );
