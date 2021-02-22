@@ -1,11 +1,15 @@
-import { UserInfo } from "os";
+import { UserInfo } from "@/Models/User";
+import AuthenticationService from "@/Services/Authentication/AuthenticationService";
+import { Theme } from "@material-ui/core";
 import { createContext, ComponentType } from "react";
 
 export interface IApplicationContext {
     Version: string;
-    // Auth: AuthenticationService;
-    // User: UserInfo;
-
+    language: string;
+    Auth: AuthenticationService;
+    User: UserInfo;
+    theme: Theme;
+    UpdateUser: (User: UserInfo) => Promise<void>;
 }
 
 export interface IApplicationContextProp {

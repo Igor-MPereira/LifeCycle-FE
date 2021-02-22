@@ -6,6 +6,6 @@ export default class UserMasks {
 
     public static HideFullEmail(email: string) {
         return email
-            .replace(/z/i, '');
+            .replace(/^([a-zA-Z0-9._%-]{3})([a-zA-Z0-9._%-]*)@([a-zA-Z0-9.-]+)([a-zA-Z0-9.-]{3})\.([a-zA-z]{2,4})$/i, '$1*******@******$4.$5');
     }
 }

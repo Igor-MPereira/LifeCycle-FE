@@ -5,12 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.sass';
 import { BrowserRouter } from 'react-router-dom';
-import pkg from 'package.json';
+const pkg = { version: "0.0.1" };
+
 
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App AppVersion={pkg.version} />
+      <App AppVersion={pkg.version} language={window.navigator.language} />
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')

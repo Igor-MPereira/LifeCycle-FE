@@ -1,5 +1,3 @@
-import { basename } from "path";
-
 export class Guid extends String {
     private static regex: RegExp = new RegExp(/^(\{{0,1}([0-9a-fA-F]){8}-{0,1}([0-9a-fA-F]){4}-{0,1}([0-9a-fA-F]){4}-{0,1}([0-9a-fA-F]){4}-{0,1}([0-9a-fA-F]){12}\}{0,1})$/i);
 

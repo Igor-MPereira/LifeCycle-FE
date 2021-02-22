@@ -12,7 +12,7 @@ class AuthenticatedRoute extends PureComponent<IAuthenticatedRouteProps> {
     }
 
     render() {
-        const { authenticated, returnUrl, ...rest } = this.props;
+        const { authenticated, returnUrl, title, ...rest } = this.props;
         let c = false;
 
         if(typeof authenticated === "boolean") {
@@ -23,6 +23,6 @@ class AuthenticatedRoute extends PureComponent<IAuthenticatedRouteProps> {
 
         c //&&= AuthenticationService.Instance.IsAuthenticated;
 
-        return <ConditionalRoute {...rest} condition={c} returnUrl={returnUrl ?? '/Login'} />
+        return <ConditionalRoute {...rest} title={title} condition={c} returnUrl={returnUrl ?? '/Login'} />
     }
 }

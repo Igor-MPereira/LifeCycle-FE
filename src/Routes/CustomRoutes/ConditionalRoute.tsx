@@ -8,10 +8,11 @@ class ConditionalRoute extends PureComponent<IConditionalRoutesProps> {
 
     constructor(props: IConditionalRoutesProps) {
         super(props);
+        document.title = props.title ?? document.title;
     }
 
     render() {
-        const { condition, returnUrl, ...rest } = this.props;
+        const { condition, returnUrl, title, ...rest } = this.props;
         let c = false;
         if(typeof condition === "boolean") {
             c = condition;
