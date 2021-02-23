@@ -24,7 +24,7 @@ export const ApplicationContextConsumer = ctx.Consumer;
 
 
 export function withAppContext<C extends IApplicationContextProp>(OriginalComponent: ComponentType<C>) {
-    return function ContextBoundComponent(props: Pick<C, Exclude<keyof C, keyof IApplicationContextProp>>) {
+    return function ContextBoundComponent(props: Omit<C, keyof IApplicationContextProp>) {
         return (
             <ApplicationContextConsumer>
                 {ctx => <OriginalComponent {...props as C} appContext={ctx} />}

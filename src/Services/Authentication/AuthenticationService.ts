@@ -87,12 +87,11 @@ class AuthenticationService {
         return this.IsAuthenticated ? this._authToken : '';
     }
 
-    public Login = async (Login: string, Password: string, Email: string) => {
+    public Login = async (Login: string, Password: string) => {
         // let errorMessage = AuthenticationService._errorMessage;
 
         try {
             let login: LoginCredentials = {
-                Email,
                 Login,
                 Password
             };

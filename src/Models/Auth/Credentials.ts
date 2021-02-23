@@ -1,7 +1,6 @@
 import { Guid } from "@/Common/BaseTypes";
 
 export interface LoginCredentials {
-    Email: string;
     Login: string;
     Password: string;
 }

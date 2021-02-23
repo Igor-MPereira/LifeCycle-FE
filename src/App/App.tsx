@@ -71,7 +71,7 @@ class App extends PureComponent<ApplicationProps<keyof typeof defaultStyles>, Ap
                       isLoggedIn={AuthenticationService.Instance.IsAuthenticated}
                     />
                     <main className={classes.content}>
-                      <div className={classes.appBarSpacer} />
+                      <div className={classes.appBarSpacer}></div>
                       <Routes />
                     </main>
                   </div>
