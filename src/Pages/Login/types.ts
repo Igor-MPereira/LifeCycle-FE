@@ -1,8 +1,6 @@
 import { IBasePageProps } from "@/Common/BaseTypes";
 
-export interface ILoginProps<C extends string = string> extends IBasePageProps<{}, C> {
-
-}
+export interface ILoginProps<C extends string = string> extends IBasePageProps<{}, C> { }
 
 export interface ILoginState {
     Input: string;
@@ -11,4 +9,6 @@ export interface ILoginState {
     InputValidationMessage: string;
     PasswordValidationMessage: string;
     PasswordValidationScore: number;
+    ShowPassword: boolean;
+    RememberMe: boolean;
 }

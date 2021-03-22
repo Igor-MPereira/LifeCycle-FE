@@ -10,6 +10,8 @@ import { IAppHeaderProps } from "./types";
 import src from '@/Assets/Images/user_undefined.png';
 import '@UI/Theme/Animations.sass';
 import withTheme from "@material-ui/core/styles/withTheme";
+import { RoutingUtil } from "@/Utils";
+import { Link } from "react-router-dom";
 
 const styles = createStyles({
     appBar: {
@@ -17,7 +19,8 @@ const styles = createStyles({
         borderTop: '0px'
     },
     logo: {
-        fontWeight: 600
+        fontWeight: 600,
+        textDecoration: 'none'
     },
     toolbar: {
         display: 'flex',
@@ -53,25 +56,28 @@ class AppHeader extends PureComponent<IAppHeaderProps<keyof typeof styles>> {
                         >
                         <img
                             src={src} 
-                            alt={
-                                UserInfo.DisplayName !== '' ? 
+                            alt='Ícone da imagem de perfil do usuário logado'
+                            title={
+                                UserInfo.DisplayName !== '' 
+                                /*RoutingUtil.getPathnameFromLocation(Page).includes('Login')*/ ? 
                                 UserInfo.DisplayName 
                                 : 
-                                'Deslogado'
-                            } 
+                                undefined
+                            }
                             width={56}
                             height={56}
                         />
                     </IconButton>
                     <Typography
                         variant='h1'
-                        component='h1'
+                        component={Link as any}
+                        to='/Feed'
                         className={classes.logo}
                     >
                         LifeCycle                        
                     </Typography>
 
-                    <div className={classes.adjustJustify} />
+                    <div className={classes.adjustJustify}>&nbsp; </div>
                 </Toolbar>
             </AppBar>
         )

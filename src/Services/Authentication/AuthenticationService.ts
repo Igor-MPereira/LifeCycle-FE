@@ -4,8 +4,8 @@ import RequestService from '../Request/RequestService';
 import { UserInfo } from '@/Models/User';
 import { LoginCredentials } from '@/Models/Auth/Credentials';
 import { ERequestServiceConfig } from '../Request/types';
-import TokenInfo, { TokenInfoDTO, TokenInfoStorage } from '@/Models/Auth/TokenInfo';
-import { ApiResponse, TokenResponse } from '@/Common/Api';
+import { TokenInfoDTO, TokenInfoStorage } from '@/Models/Auth/TokenInfo';
+import { ApiResponse, ErrorResponse } from '@/Common/Api';
 
 
 class AuthenticationService {
@@ -16,21 +16,6 @@ class AuthenticationService {
     private _expiresIn: number = 0;
     private _isAuthenticated: boolean = false;
     private ReqService: RequestService;
-
-    private LoadAuth = () => {
-        const storedToken = sessionStorage.getItem("LFatSt") ?? '';
-         
-        if(storedToken) {
-            let tokenInfo = (JSON.parse(storedToken) || { }) as TokenInfoStorage;
-
-            if(tokenInfo && tokenInfo.ValidTo && (new Date().getTime() < tokenInfo.ValidTo)) {
-                this._authToken = tokenInfo.AccessToken;
-                this._expiresIn = tokenInfo.ValidTo;
-                this._isAuthenticated = true;
-                this.LoadUser();
-            }
-        }
-    }
 
     private LoadUser(token?: JwtPayload & { display_name: string, location: string, email: string, birthdate: string, id: string }) {
         try {
@@ -44,8 +29,11 @@ class AuthenticationService {
                 decodedToken.birthdate,
                 decodedToken.location
             );
+            console.log(this._userInfo)
+            return this._userInfo;
         } catch (e) {
             console.log(e);
+            throw e;
         }
     }
 
@@ -63,13 +51,42 @@ class AuthenticationService {
             { display_name: string, location: string, email: string, birthdate: string, id: string }>(token)
     }
 
+    private ThrowErrorResponse(e: unknown) {
+        if((e as Error).message === "Failed to fetch") {
+            throw new ErrorResponse("A conexão com o servidor se perdeu, verifique se há conexão com a internet e tente novamente.", 0);
+        }
+
+        if(e instanceof ErrorResponse) {
+            throw new ErrorResponse(e.Message, e.StatusCode, e.Details);
+        } else {
+            throw new ErrorResponse(`Algo deu errado : ${(e as Error).message} : ${(e as Error).stack}`, 0);
+        }
+    }
+
     constructor() {
         AuthenticationService._singletonInstance = this;
         this.ReqService = new RequestService(ERequestServiceConfig.AnonymousJsonDefault);
         this._userInfo = new UserInfo();
     }
 
-    public static readonly AuthEndpoint: string = RequestService.apiUrl + 'auth/';
+    public LoadAuth = () => {
+        const storedToken = sessionStorage.getItem("LFwaATSeSt") ?? '';
+        console.log(storedToken)
+        if(storedToken) {
+            let tokenInfo = (JSON.parse(storedToken) || { }) as TokenInfoStorage;
+            console.log(tokenInfo && tokenInfo.ValidTo && (new Date().getTime() < tokenInfo.ValidTo))
+            if(tokenInfo && tokenInfo.ValidTo && (new Date().getTime() < tokenInfo.ValidTo)) {
+                this._authToken = tokenInfo.AccessToken;
+                this._expiresIn = tokenInfo.ValidTo;
+                this._isAuthenticated = true;
+                return this.LoadUser();
+            }
+        }
+
+        return new UserInfo();
+    }
+
+    public static readonly AuthEndpoint: string = 'https://localhost:5001/api/auth/';
 
     public static get Instance() {
         if(AuthenticationService._singletonInstance === null) {
@@ -80,16 +97,18 @@ class AuthenticationService {
     }
 
     public get IsAuthenticated() {
-        return (this._isAuthenticated = !!this._authToken && new Date().getTime() / 1000 < this._expiresIn);
+        return (this._isAuthenticated = !!this._authToken && new Date().getTime() < this._expiresIn);
     }
 
     public get Token() {
         return this.IsAuthenticated ? this._authToken : '';
     }
 
-    public Login = async (Login: string, Password: string) => {
-        // let errorMessage = AuthenticationService._errorMessage;
+    public get UserInfo() {
+        return this._userInfo;
+    }
 
+    public Login = async (Login: string, Password: string) => {
         try {
             let login: LoginCredentials = {
                 Login,
@@ -101,18 +120,18 @@ class AuthenticationService {
             const ValidTo = Date.parse(tokenInfo.ValidTo);
             this._authToken = tokenInfo.AccessToken;
             this._expiresIn = ValidTo;
-            sessionStorage.setItem("LFatSt", JSON.stringify({ AccessToken: tokenInfo.AccessToken, ValidTo } as TokenInfoStorage));
+            sessionStorage.setItem("LFwaATSeSt", JSON.stringify({ AccessToken: tokenInfo.AccessToken, ValidTo } as TokenInfoStorage));
             let jwtPayload = this.decode(tokenInfo.AccessToken);
-            localStorage.setItem("LFulSt", jwtPayload.sub ?? "");
-            this.LoadUser(jwtPayload);
+            localStorage.setItem("LFwaRTLoSt", tokenInfo.RefreshToken);
+            localStorage.setItem("LFwaULSt", jwtPayload.sub ?? "");
             this._isAuthenticated = true;
-            return true;
+            return this.LoadUser(jwtPayload);
         } catch(err) {
             console.log(err);
 
             this.RevokeCredentials();
 
-            throw AuthenticationService._errorMessage;
+            throw this.ThrowErrorResponse(err);
         }
     }
 
@@ -125,7 +144,7 @@ class AuthenticationService {
                     credentials: 'include',
                     headers: new Headers([["Content-Type","application/json"]]),
                     mode: 'cors',
-                    body: JSON.stringify({ UserId: localStorage.getItem("LFulSt") ?? '' })
+                    body: JSON.stringify({ UserId: localStorage.getItem("LFwaULSt") ?? '', RefreshToken: localStorage.getItem("LFwaRTLoSt") ?? '' })
                 }
             );
 
@@ -133,19 +152,23 @@ class AuthenticationService {
 
             let tokenInfo = tokenResponse.Value;
 
+            if(!tokenInfo) {
+                throw new ErrorResponse("Token inválido", 500, "");
+            }
+
             const ValidTo = Date.parse(tokenInfo.ValidTo);
             this._authToken = tokenInfo.AccessToken;
             this._expiresIn = ValidTo;
-            sessionStorage.setItem("LFatSt", JSON.stringify({ AccessToken: tokenInfo.AccessToken, ValidTo } as TokenInfoStorage));
-            this.LoadUser();
+            sessionStorage.setItem("LFwaATSeSt", JSON.stringify({ AccessToken: tokenInfo.AccessToken, ValidTo } as TokenInfoStorage));
+            localStorage.setItem("LFwaRTLoSt", tokenInfo.RefreshToken);
             this._isAuthenticated = true;
-            return true;
+            return this.LoadUser();
         } catch (e) {
             console.log(e);
 
             this.RevokeCredentials();
 
-            throw "Houve um erro ao tentar realizar essa ação. Você será redirecionado para o LogIn";
+            throw this.ThrowErrorResponse({ message: "Houve um erro ao tentar realizar essa ação. Você será redirecionado para o LogIn" });
         }
     }
 }

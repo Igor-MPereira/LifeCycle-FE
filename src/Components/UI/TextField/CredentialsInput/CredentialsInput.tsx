@@ -1,4 +1,5 @@
 import { Theme } from "@material-ui/core";
+import { InputBaseComponentProps } from "@material-ui/core/InputBase";
 import TextField from "@material-ui/core/TextField";
 import makeStyles from "@material-ui/styles/makeStyles";
 import React from "react";
@@ -27,20 +28,34 @@ const useStyles = makeStyles((t: Theme) => ({
 }))
 
 function CredentialsInput(props: ICredentialsInputProps) {
-    const { onChange, variant, InputLabelProps, className, ...rest } = props;
+    const { onChange, variant, InputLabelProps, className, endAdornment, ...rest } = props;
 
     const classes = useStyles();
+
+    const inputProps: InputBaseComponentProps = { };
+
+    // switch(props.type) {
+    //     case 'date':
+    //         inputProps['pattern'] = '\d{2}-\d{2}-\d{4}';
+    //     break;
+
+    //     default:
+            
+    //     break;
+    // }
 
     return (
         <TextField
             {...rest}
             className={`${className} ${classes.textfield}`}
             variant='outlined'
+            id={props.id}
             InputProps={{
                 classes:{
                     focused: `${classes.InputLabelFocused} ${classes.InputFocused}`,
                     notchedOutline: classes.InputLabel
-                }
+                },
+                endAdornment,
             }}
             InputLabelProps={{
                 ...InputLabelProps,
@@ -51,8 +66,10 @@ function CredentialsInput(props: ICredentialsInputProps) {
                 }
             }}
             inputProps={{
+                ...inputProps,
                 style: {
-                    color: 'white'
+                    color: 'white',
+                    textAlign: 'center'
                 }
             }}
             onChange={e => onChange(e.target.value)}

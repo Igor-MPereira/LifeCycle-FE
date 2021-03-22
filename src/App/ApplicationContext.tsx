@@ -1,15 +1,21 @@
 import { UserInfo } from "@/Models/User";
 import AuthenticationService from "@/Services/Authentication/AuthenticationService";
 import { Theme } from "@material-ui/core";
-import { createContext, ComponentType } from "react";
+import { createContext, ComponentType, useContext } from "react";
+import * as H from 'history';
+import { BaseLocationState } from "@/Common/BaseTypes";
+
+export type PageInfo = Partial<H.Location<BaseLocationState>>
 
 export interface IApplicationContext {
     Version: string;
     language: string;
     Auth: AuthenticationService;
-    User: UserInfo;
     theme: Theme;
+    User: UserInfo;
     UpdateUser: (User: UserInfo) => Promise<void>;
+    // Page: PageInfo;
+    // UpdatePage: (Page: PageInfo) => void;
 }
 
 export interface IApplicationContextProp {
@@ -32,3 +38,7 @@ export function withAppContext<C extends IApplicationContextProp>(OriginalCompon
         );
     }
 };
+
+export function useAppContext() {
+    return useContext(ctx)
+}

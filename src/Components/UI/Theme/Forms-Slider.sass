@@ -1,0 +1,30 @@
+@keyframes scale-up
+    0%
+        transform: scale(1)
+    100%
+        transform: scale(1.2)
+
+#swiper-container
+    width: fit-content
+    flex-wrap: nowrap
+    margin: unset !important
+    transition: transform 0.4s ease-in-out
+    transform: translateX(calc(50vw - 129px - 36px - 40px))
+
+.form-paper
+    animation-delay: 0s
+    animation-name: scale-up 
+    animation-duration: 0.2s 
+    animation-timing-function: ease-in      
+    transform: scale(1)
+
+.focused
+    transform: scale(1.2)
+
+.unfocused
+    transform: scale(0.9)
+    animation: transform 0.2s ease-in 0s normal forwards
+    &:hover
+        transform: scale(1)
+        transition: transform 0.05s linear
+    

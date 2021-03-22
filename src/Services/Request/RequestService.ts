@@ -1,4 +1,4 @@
-import { ApiResponse, ErrorResponse, isApiResponse, isErrorResponse, _BaseResponse } from "@/Common/Api";
+import { ErrorResponse, isApiResponse, isErrorResponse, _BaseResponse } from "@/Common/Api";
 import AuthenticationService from "../Authentication/AuthenticationService";
 import { ERequestServiceConfig } from "./types";
 
@@ -73,6 +73,7 @@ class RequestService {
 
     public GetJson = async <Response = unknown>(url: string): Promise<Response> => {
         try {
+            console.log('unauth:', !this.AuthService.IsAuthenticated && this.headers.has("Authorization"))
             if(this.headers.has("Authorization") && !this.AuthService.IsAuthenticated) {
                 await this.AuthService.Refresh();
                 this.appendHeader("Authorization", `Bearer ${this.AuthService.Token}`);

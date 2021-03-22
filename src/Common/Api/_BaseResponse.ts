@@ -29,7 +29,7 @@ export function isApiResponse<TResponse>(x: unknown): x is ApiResponse<TResponse
 
 export function isErrorResponse(x: unknown): x is ErrorResponse {
     let val = x as ErrorResponse;
-
+    console.log({x})
     return val !== undefined && val !== null
         && val.Success !== true && val.StatusCode !== 200; 
 }

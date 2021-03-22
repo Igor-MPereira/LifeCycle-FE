@@ -1,56 +1,74 @@
 import AppHeader from '@/Components/AppHeader';
+import GeneralError from '@/Components/GeneralError/GeneralError';
 import DefaultStyles from '@/Components/UI/Theme/DefaultStyles';
 import DefaultTheme from '@/Components/UI/Theme/DefaultTheme';
 import { UserInfo } from '@/Models/User';
 import Routes from '@/Routes';
 import AuthenticationService from '@/Services/Authentication/AuthenticationService';
-import RequestService from '@/Services/Request/RequestService';
-import { Divider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import withStyles from '@material-ui/styles/withStyles';
 import React, { PureComponent } from 'react';
-import { BrowserRouter, RouteComponentProps } from 'react-router-dom';
-import { ApplicationContextConsumer, ApplicationContextProvider, IApplicationContext } from './ApplicationContext';
+import { BrowserRouter } from 'react-router-dom';
+import { ApplicationContextConsumer, ApplicationContextProvider, IApplicationContext, PageInfo } from './ApplicationContext';
 import { ApplicationProps, ApplicationState } from './types';
 
 let appContext = { 
   theme: DefaultTheme({}),
-  Auth: AuthenticationService.Instance,
-  User: new UserInfo()
+  User: new UserInfo(),
 } as IApplicationContext;
 
 let defaultStyles = DefaultStyles(appContext.theme);
 
 class App extends PureComponent<ApplicationProps<keyof typeof defaultStyles>, ApplicationState> {
+  private RememberMe: boolean;
+
   constructor(props: ApplicationProps) {
     super(props);
-
+    
     appContext.Version = props.AppVersion;
     appContext.language = props.language;
+    appContext.Auth = new AuthenticationService();
     appContext.UpdateUser = this.UpdateUser;
+    // appContext.UpdatePage = this.UpdatePage;
+
+    this.RememberMe = !!Number(localStorage.getItem("LFwaRMLoSt")) || !!Number(sessionStorage.getItem("LFwaRMSeSt"));
+
+    if(this.RememberMe) appContext.User = appContext.Auth.LoadAuth();
 
     this.state = {
-      appContext,
+      appContext
     };
   }
 
-  async componentDidMount() {
-  }
+  public UpdateUser = (User: UserInfo) => new Promise<void>((resolve, reject) => {
+    this.setState(s => ({
+      appContext: {
+        ...s.appContext,
+        User
+      }
+    }))
+  });  
 
-  public UpdateUser = async (User: UserInfo) => {
-    return new Promise<void>((resolve, reject) => {
-      this.setState(s => {
-        if(s.appContext) {
-          resolve();
-          return { appContext: { ...appContext, User} };
-        } else {
-          reject();
-          return null;
+  public UpdatePage = (Page: PageInfo) => {
+    this.setState(s => ({
+      appContext: {
+        ...s.appContext,
+        Page
+      }
+    }));
+  }
+  
+  async componentDidMount() {
+    if(this.state.appContext.User.DisplayName === "" && this.RememberMe) {
+      let User = await this.state.appContext.Auth.Refresh();
+      this.setState(s => ({
+        appContext: {
+          ...s.appContext,
+          User
         }
-      })
-    });
+      }));
+    }
   }
 
   render() {
@@ -71,8 +89,10 @@ class App extends PureComponent<ApplicationProps<keyof typeof defaultStyles>, Ap
                       isLoggedIn={AuthenticationService.Instance.IsAuthenticated}
                     />
                     <main className={classes.content}>
-                      <div className={classes.appBarSpacer}></div>
-                      <Routes />
+                      <GeneralError>
+                        <div className={classes.appBarSpacer}></div>
+                        <Routes />
+                      </GeneralError>
                     </main>
                   </div>
                 </BrowserRouter>
